@@ -128,3 +128,30 @@ pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
         }),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_cep_test() {
+        let cep = get_cep("01001000").await.unwrap();
+
+        assert_eq!(cep.state, "SP");
+        assert_eq!(cep.street, "Praça da Sé");
+    }
+
+    #[tokio::test]
+    async fn get_cep_error() {
+        let cep = get_cep("12345678").await;
+
+        assert!(cep.is_err());
+    }
+
+    #[tokio::test]
+    async fn validate_test() {
+        let cep = validate("01001000").await.unwrap();
+
+        assert!(cep);
+    }
+}
