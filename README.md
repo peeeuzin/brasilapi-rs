@@ -6,6 +6,8 @@ Cliente para a API do BrasilAPI (para o Rust).
 
 </div>
 
+Crate: [brasilapi](https://crates.io/crates/brasilapi)
+
 # Features
  - [x] **CEP (Zip code)**
  - [ ] **DDD**
