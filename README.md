@@ -18,7 +18,7 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
 # Features
  - [x] **CEP (Zip code)**
  - [x] **DDD**
- - [ ] **Bank**
+ - [x] **Bank**
  - [ ] **CNPJ**
  - [ ] **IBGE**
  - [ ] **Feriados Nacionais**
