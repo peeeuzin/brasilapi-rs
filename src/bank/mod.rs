@@ -33,6 +33,11 @@ pub enum Errored {
     NotFound(BankError),
 }
 
+/// Consulta todos os bancos cadastrados na Brasil API
+///
+/// Retorna:
+///
+/// Result<Vec<Bank>, UnexpectedError>
 pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
     let url = format!("{}/api/banks/v1", BRASIL_API_URL);
 
@@ -55,6 +60,15 @@ pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
     Ok(banks)
 }
 
+/// Consulta um banco pelo seu código
+///
+/// Argumentos:
+///
+/// * `code`: Código do banco
+///
+/// Retorna:
+///
+/// Result<Bank, UnexpectedError>
 pub async fn get_bank(code: i32) -> Result<Bank, UnexpectedError> {
     let url = format!("{}/api/banks/v1/{}", BRASIL_API_URL, code);
 
