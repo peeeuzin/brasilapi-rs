@@ -103,22 +103,22 @@ mod ddd_tests {
 
     #[tokio::test]
     async fn get_ddd_test() {
-        let cep = get_ddd("61").await.unwrap();
+        let ddd = get_ddd("61").await.unwrap();
 
-        assert_eq!(cep.state, "DF");
+        assert_eq!(ddd.state, "DF");
     }
 
     #[tokio::test]
     async fn get_ddd_error() {
-        let cep = get_ddd("123").await;
+        let ddd = get_ddd("123").await;
 
-        assert!(cep.is_err());
+        assert!(ddd.is_err());
     }
 
     #[tokio::test]
     async fn ddd_exists_test() {
-        let cep = ddd_exists("21").await.unwrap();
+        let ddd = ddd_exists("21").await.unwrap();
 
-        assert!(cep);
+        assert!(ddd);
     }
 }
