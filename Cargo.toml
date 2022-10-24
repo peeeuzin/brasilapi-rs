@@ -1,0 +1,11 @@
+[package]
+name = "brasilapi"
+version = "0.1.0"
+edition = "2021"
+description = "Uma lib para a API do Brasil API"
+
+[dependencies]
+reqwest = "0.11.12"
+serde_json = "1.0.87"
+serde = { version = "1.0.147", features = ["derive"] }
+tokio = { version = "1.21.2", features = ["macros", "rt-multi-thread"] }
