@@ -41,6 +41,33 @@ pub struct CepServiceError {
     pub service: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Errored {
+    NotFound(CepError),
+    Unexpected,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct UnexpectedError {
+    pub code: u16,
+    pub message: String,
+    pub error: Errored,
+}
+
+pub struct CepService;
+
+impl CepService {
+    async fn get_cep(cep_code: &str) -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("{}/api/cep/v2/{}", BRASIL_API_URL, cep_code);
+        reqwest::get(&url).await
+    }
+
+    async fn get_cep_validation(cep_code: &str) -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("{}/api/cep/v2/{}", BRASIL_API_URL, cep_code);
+        reqwest::get(&url).await
+    }
+}
+
 /// Faz um GET Request para a API de CEP do Brasil API e retorna o CEP mais detalhado possível.
 ///
 /// Argumentos:
@@ -49,22 +76,32 @@ pub struct CepServiceError {
 ///
 /// Retorna:
 ///
-/// Result<Cep, CepError>
-pub async fn get_cep(cep_code: &str) -> Result<Cep, CepError> {
-    let url = format!("{}/api/cep/v2/{}", BRASIL_API_URL, cep_code);
+/// Result<Cep, UnexpectedError>
+pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
+    let response = CepService::get_cep(cep_code).await.unwrap();
 
-    let response = reqwest::get(&url).await.unwrap();
+    match response.status().as_u16() {
+        200 => {
+            let body = response.text().await.unwrap();
+            let cep: Cep = serde_json::from_str(&body).unwrap();
 
-    if response.status().as_u16() == 404 {
-        let body = response.text().await.unwrap();
-        let cep: CepError = serde_json::from_str(&body).unwrap();
+            Ok(cep)
+        },
+        404 => {
+            let body = response.text().await.unwrap();
+            let cep_err: CepError = serde_json::from_str(&body).unwrap();
 
-        Err(cep)
-    } else {
-        let body = response.text().await.unwrap();
-        let cep: Cep = serde_json::from_str(&body).unwrap();
-
-        Ok(cep)
+            Err(UnexpectedError {
+                code: 404,
+                message: format!("Not founded cep: {}", cep_code),
+                error: Errored::NotFound(cep_err),
+            })
+        },
+        code => Err(UnexpectedError {
+            code,
+            message: format!("Unexpected error with code: {}", code),
+            error: Errored::Unexpected,
+        }),
     }
 }
 
@@ -76,13 +113,20 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, CepError> {
 ///
 /// Retorna:
 ///
-/// Um valor booleano indicando se o CEP é válido ou não.
-pub async fn validate(cep_code: &str) -> bool {
-    let url = format!("{}/api/cep/v2/{}", BRASIL_API_URL, cep_code);
+/// Um resultado com valor booleano indicando se o CEP é válido ou não ou o mapeamento do erro.
+pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
+    let response = CepService::get_cep_validation(cep_code).await.unwrap();
 
-    let response = reqwest::get(&url).await.unwrap();
-
-    response.status().as_u16() == 200
+    match response.status().as_u16() {
+        200 => {
+            Ok(true)
+        },
+        code => Err(UnexpectedError {
+            code,
+            message: format!("Unexpected error with code: {}", code),
+            error: Errored::Unexpected,
+        }),
+    }
 }
 
 #[cfg(test)]
@@ -106,7 +150,7 @@ mod tests {
 
     #[tokio::test]
     async fn validate_test() {
-        let cep = validate("01001000").await;
+        let cep = validate("01001000").await.unwrap();
 
         assert!(cep);
     }
