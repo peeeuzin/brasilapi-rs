@@ -1,12 +1,19 @@
 <div align="center">
+<h1>
+<img src="https://raw.githubusercontent.com/BrasilAPI/BrasilAPI/main/public/brasilapi-logo-small.png" />
 
-# Brasil API
+<div>
 
-Cliente para a API do BrasilAPI (para o Rust).
+![downloads](https://img.shields.io/crates/dv/brasilapi?label=downloads%20)
+![version](https://img.shields.io/crates/v/brasilapi?label=version%20)
+![license](https://img.shields.io/crates/l/brasilapi)
+
+</div>
+</h1>
 
 </div>
 
-Crate: [brasilapi](https://crates.io/crates/brasilapi)
+Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://github.com/BrasilAPI/BrasilAPI) (para o Rust)
 
 # Features
  - [x] **CEP (Zip code)**
