@@ -2,6 +2,10 @@
 name = "brasilapi"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+homepage = "https://brasilapi.com.br"
+repository = "https://github.com/pedrinfx/brasilapi-rs"
+authors = ["Pedro Augusto"]
 description = "Uma lib para a API do Brasil API"
 
 [dependencies]
