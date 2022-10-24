@@ -24,6 +24,6 @@ mod tests {
     async fn validate() {
         let cep = cep::validate("01001000").await;
 
-        assert!(cep);
+        assert!(cep.unwrap());
     }
 }
