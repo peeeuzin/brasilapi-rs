@@ -37,6 +37,15 @@ pub struct UnexpectedError {
     pub error: Errored,
 }
 
+/// Get a DDD from the Brasil API
+///
+/// Argumentos:
+///
+/// * `ddd`: DDD para ser consultado
+///
+/// Retorna:
+///
+/// Result<Ddd, UnexpectedError>
 pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
     let url = format!("{}/api/ddd/v1/{}", BRASIL_API_URL, ddd);
 
@@ -58,6 +67,15 @@ pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
     Ok(ddd)
 }
 
+/// Retorna um booleano indicando se um DDD existe ou não
+///
+/// Argumentos:
+///
+/// * `ddd`: DDD a ser validado
+///
+/// Retorna:
+///
+/// Result<bool, UnexpectedError>
 pub async fn ddd_exists(ddd: &str) -> Result<bool, UnexpectedError> {
     let url = format!("{}/api/ddd/v1/{}", BRASIL_API_URL, ddd);
 
