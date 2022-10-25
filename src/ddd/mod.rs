@@ -37,6 +37,15 @@ pub struct UnexpectedError {
     pub error: Errored,
 }
 
+pub struct DDDService;
+
+impl DDDService {
+    async fn get_cep_request(ddd: &str) -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("{}/api/ddd/v1/{}", BRASIL_API_URL, ddd);
+        reqwest::get(&url).await
+    }
+}
+
 /// Get a DDD from the Brasil API
 ///
 /// Argumentos:
@@ -47,9 +56,8 @@ pub struct UnexpectedError {
 ///
 /// Result<Ddd, UnexpectedError>
 pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
-    let url = format!("{}/api/ddd/v1/{}", BRASIL_API_URL, ddd);
+    let response = DDDService::get_cep_request(ddd).await.unwrap();
 
-    let response = reqwest::get(&url).await.unwrap();
     let status = response.status().as_u16();
 
     if status != 200 {
@@ -77,9 +85,8 @@ pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
 ///
 /// Result<bool, UnexpectedError>
 pub async fn ddd_exists(ddd: &str) -> Result<bool, UnexpectedError> {
-    let url = format!("{}/api/ddd/v1/{}", BRASIL_API_URL, ddd);
+    let response = DDDService::get_cep_request(ddd).await.unwrap();
 
-    let response = reqwest::get(&url).await.unwrap();
     let status = response.status().as_u16();
 
     if status == 404 {

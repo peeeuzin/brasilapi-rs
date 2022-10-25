@@ -33,15 +33,28 @@ pub enum Errored {
     NotFound(BankError),
 }
 
+pub struct BankService;
+
+impl BankService {
+    async fn get_all_banks() -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("{}/api/banks/v1", BRASIL_API_URL);
+        reqwest::get(&url).await
+    }
+
+    async fn get_bank_by_code(code: i32) -> Result<reqwest::Response, reqwest::Error> {
+        let url = format!("{}/api/banks/v1/{}", BRASIL_API_URL, code);
+        reqwest::get(&url).await
+    }
+}
+
 /// Consulta todos os bancos cadastrados na Brasil API
 ///
 /// Retorna:
 ///
 /// Result<Vec<Bank>, UnexpectedError>
 pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
-    let url = format!("{}/api/banks/v1", BRASIL_API_URL);
+    let response = BankService::get_all_banks().await.unwrap();
 
-    let response = reqwest::get(&url).await.unwrap();
     let status = response.status().as_u16();
 
     if status != 200 {
@@ -70,9 +83,8 @@ pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
 ///
 /// Result<Bank, UnexpectedError>
 pub async fn get_bank(code: i32) -> Result<Bank, UnexpectedError> {
-    let url = format!("{}/api/banks/v1/{}", BRASIL_API_URL, code);
+    let response = BankService::get_bank_by_code(code).await.unwrap();
 
-    let response = reqwest::get(&url).await.unwrap();
     let status = response.status().as_u16();
 
     if status == 404 {
