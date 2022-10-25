@@ -27,6 +27,9 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [ ] **Registros de domínios br**
  - [ ] **Taxas**
 
+# Como contribuir
+Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para ver como contribuir com o projeto.
+
 
 # Instalação
 Adicione a seguinte linha ao seu `Cargo.toml`:
@@ -44,3 +47,6 @@ brasilapi = "0.3.0"
 
 
 </div>
+
+# License
+[MIT](./LICENSE)
