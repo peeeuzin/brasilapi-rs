@@ -123,7 +123,7 @@ pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
 }
 
 #[cfg(test)]
-mod tests {
+mod cep_tests {
     use super::*;
 
     #[tokio::test]
