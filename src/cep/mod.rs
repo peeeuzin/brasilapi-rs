@@ -57,12 +57,7 @@ pub struct UnexpectedError {
 pub struct CepService;
 
 impl CepService {
-    async fn get_cep(cep_code: &str) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/cep/v2/{}", BRASIL_API_URL, cep_code);
-        reqwest::get(&url).await
-    }
-
-    async fn get_cep_validation(cep_code: &str) -> Result<reqwest::Response, reqwest::Error> {
+    async fn get_cep_request(cep_code: &str) -> Result<reqwest::Response, reqwest::Error> {
         let url = format!("{}/api/cep/v2/{}", BRASIL_API_URL, cep_code);
         reqwest::get(&url).await
     }
@@ -78,7 +73,7 @@ impl CepService {
 ///
 /// Result<Cep, UnexpectedError>
 pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
-    let response = CepService::get_cep(cep_code).await.unwrap();
+    let response = CepService::get_cep_request(cep_code).await.unwrap();
 
     match response.status().as_u16() {
         200 => {
@@ -86,7 +81,7 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
             let cep: Cep = serde_json::from_str(&body).unwrap();
 
             Ok(cep)
-        },
+        }
         404 => {
             let body = response.text().await.unwrap();
             let cep_err: CepError = serde_json::from_str(&body).unwrap();
@@ -96,7 +91,7 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
                 message: format!("Not founded cep: {}", cep_code),
                 error: Errored::NotFound(cep_err),
             })
-        },
+        }
         code => Err(UnexpectedError {
             code,
             message: format!("Unexpected error with code: {}", code),
@@ -115,12 +110,10 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
 ///
 /// Um resultado com valor booleano indicando se o CEP é válido ou não ou o mapeamento do erro.
 pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
-    let response = CepService::get_cep_validation(cep_code).await.unwrap();
+    let response = CepService::get_cep_request(cep_code).await.unwrap();
 
     match response.status().as_u16() {
-        200 => {
-            Ok(true)
-        },
+        200 => Ok(true),
         code => Err(UnexpectedError {
             code,
             message: format!("Unexpected error with code: {}", code),
