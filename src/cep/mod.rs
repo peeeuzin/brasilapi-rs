@@ -97,7 +97,7 @@ impl CepService {
         }
     }
 
-    async fn validate(&self, response: reqwest::Response, cep_code: &str) -> Result<bool, UnexpectedError> {
+    async fn validate(&self, response: reqwest::Response) -> Result<bool, UnexpectedError> {
         match response.status() {
             StatusCode::OK => Ok(true),
             code => Err(UnexpectedError {
@@ -136,7 +136,7 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
 pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
     let cep_service = CepService::new(BRASIL_API_URL);
     let response = cep_service.get_cep_request(cep_code).await.unwrap();
-    cep_service.validate(response, cep_code).await
+    cep_service.validate(response).await
 }
 
 #[cfg(test)]
@@ -209,7 +209,7 @@ mod cep_tests {
 
         let cep_service = CepService::new(&server.base_url());
         let response = cep_service.get_cep_request(cep_code);
-        let result = cep_service.validate(response.await.unwrap(), cep_code);
+        let result = cep_service.validate(response.await.unwrap());
         let expectation = result.await.unwrap_err();
 
         mock.assert_async().await;
