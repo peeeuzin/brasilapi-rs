@@ -19,7 +19,7 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **CEP (Zip code)**
  - [x] **DDD**
  - [x] **Bank**
- - [ ] **CNPJ**
+ - [x] **CNPJ**
  - [ ] **IBGE**
  - [ ] **Feriados Nacionais**
  - [ ] **Tabela FIPE**
@@ -36,7 +36,7 @@ Adicione a seguinte linha ao seu `Cargo.toml`:
 
 ```toml
 [dependencies]
-brasilapi = "0.3.0"
+brasilapi = "0.4.0"
 ```
 
 # Autor
