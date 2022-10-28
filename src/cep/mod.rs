@@ -71,8 +71,7 @@ impl CepService {
         reqwest::get(&url).await
     }
 
-    async fn dispatch(&self, bare_response: reqwest::Response, cep_code: &str) -> Result<Cep, UnexpectedError> {
-        let response = bare_response;
+    async fn dispatch(&self, response: reqwest::Response, cep_code: &str) -> Result<Cep, UnexpectedError> {
         match response.status() {
             StatusCode::OK => {
                 let body = response.text().await.unwrap();
@@ -95,6 +94,17 @@ impl CepService {
                 message: format!("Unexpected error with code: {}", code),
                 error: Errored::Unexpected,
             })
+        }
+    }
+
+    async fn validate(&self, response: reqwest::Response, cep_code: &str) -> Result<bool, UnexpectedError> {
+        match response.status() {
+            StatusCode::OK => Ok(true),
+            code => Err(UnexpectedError {
+                code: code.as_u16(),
+                message: format!("Unexpected error with code: {}", code),
+                error: Errored::Unexpected,
+            }),
         }
     }
 }
@@ -126,15 +136,7 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
 pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
     let cep_service = CepService::new(BRASIL_API_URL);
     let response = cep_service.get_cep_request(cep_code).await.unwrap();
-
-    match response.status() {
-        StatusCode::OK => Ok(true),
-        code => Err(UnexpectedError {
-            code: code.as_u16(),
-            message: format!("Unexpected error with code: {}", code),
-            error: Errored::Unexpected,
-        }),
-    }
+    cep_service.validate(response, cep_code).await
 }
 
 #[cfg(test)]
@@ -160,19 +162,27 @@ mod cep_tests {
 
     #[tokio::test]
     async fn get_cep_unexpected_error() {
-        let server = MockServer::start();
-        let _mock = server.mock(|when, then| {
+        let cep_code = "99999999";
+        let server = MockServer::start_async().await;
+        let mock = server.mock_async(|when, then| {
             when.method("GET")
-            .path("/api/cep/v2/99999999");
+                .path(format!("/api/cep/v2/{}", cep_code));
             then.status(500)
-            .json_body(json!({ "foo": "bar" }));
-        });
+                .json_body(json!({
+                    "name": "Internal Server Error",
+                    "message": "Error interno do servidor",
+                }));
+        })
+        .await;
 
-        let url = format!("https://{}", server.address());
-        let cep_service = CepService::new(&url);
-        let response = cep_service.get_cep_request("999999999");
+        let cep_service = CepService::new(&server.base_url());
+        let response = cep_service.get_cep_request(cep_code);
+        let result = cep_service.dispatch(response.await.unwrap(), cep_code);
+        let expectation = result.await.unwrap_err();
 
-        assert!(response.await.is_err());
+        mock.assert_async().await;
+
+        assert_eq!(expectation.code, StatusCode::INTERNAL_SERVER_ERROR.as_u16());
     }
 
     #[tokio::test]
@@ -180,5 +190,30 @@ mod cep_tests {
         let cep = validate("01001000").await.unwrap();
 
         assert!(cep);
+    }
+
+    #[tokio::test]
+    async fn get_validate_unexpected_error() {
+        let cep_code = "99999998";
+        let server = MockServer::start_async().await;
+        let mock = server.mock_async(|when, then| {
+            when.method("GET")
+            .path(format!("/api/cep/v2/{}", cep_code));
+            then.status(500)
+            .json_body(json!({
+            "name": "Internal Server Error",
+            "message": "Error interno do servidor",
+            }));
+        })
+        .await;
+
+        let cep_service = CepService::new(&server.base_url());
+        let response = cep_service.get_cep_request(cep_code);
+        let result = cep_service.validate(response.await.unwrap(), cep_code);
+        let expectation = result.await.unwrap_err();
+
+        mock.assert_async().await;
+
+        assert_eq!(expectation.code, StatusCode::INTERNAL_SERVER_ERROR.as_u16());
     }
 }
