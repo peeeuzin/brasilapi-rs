@@ -1,5 +1,5 @@
-use serde::{Serialize, Deserialize};
 use crate::spec::BRASIL_API_URL;
+use serde::{Deserialize, Serialize};
 
 pub struct CnpjService;
 
@@ -24,7 +24,7 @@ pub struct Cnpj {
     numero: Option<String>,
     complemento: Option<String>,
     bairro: Option<String>,
-    cep: Option<i32>,
+    cep: Option<String>,
     uf: Option<String>,
     codigo_municipio: Option<i32>,
     municipio: Option<String>,
@@ -32,8 +32,8 @@ pub struct Cnpj {
     ddd_telefone_2: Option<String>,
     ddd_fax: Option<String>,
     qualificacao_do_responsavel: Option<i32>,
-    capital_social: Option<i32>,
-    porte: Option<i32>,
+    capital_social: Option<i64>,
+    porte: Option<String>,
     descricao_porte: Option<String>,
     opcao_pelo_simples: Option<bool>,
     data_opcao_pelo_simples: Option<String>,
@@ -99,8 +99,8 @@ pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, UnexpectedError> {
 
     match status {
         200 => {
-            let cnpj: Cnpj  = serde_json::from_str(&response.text().await.unwrap()).unwrap();
-            
+            let cnpj: Cnpj = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+
             Ok(cnpj)
         }
         404 => {
@@ -118,8 +118,20 @@ pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, UnexpectedError> {
             Err(UnexpectedError {
                 code: status,
                 message: error.message,
-                error: Errored::Unexpected
+                error: Errored::Unexpected,
             })
         }
+    }
+}
+
+#[cfg(test)]
+mod cnpj_tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_get_cnpj() {
+        let cnpj = get_cnpj("00000000000191").await.unwrap();
+
+        assert_eq!(cnpj.cnpj, Some("00000000000191".to_string()));
     }
 }
