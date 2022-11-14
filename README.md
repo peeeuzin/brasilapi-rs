@@ -4,8 +4,8 @@
 
 <div>
 
-![downloads](https://img.shields.io/crates/dv/brasilapi?label=downloads%20)
-![version](https://img.shields.io/crates/v/brasilapi?label=version%20)
+[![downloads](https://img.shields.io/crates/dv/brasilapi?label=downloads%20)](https://crates.io/crates/brasilapi)
+[![version](https://img.shields.io/crates/v/brasilapi?label=version%20)](https://crates.io/crates/brasilapi)
 ![license](https://img.shields.io/crates/l/brasilapi)
 
 </div>
