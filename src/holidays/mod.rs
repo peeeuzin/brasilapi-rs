@@ -4,7 +4,7 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Holiday {
     date: String,
     #[serde(rename = "type")]
@@ -102,5 +102,41 @@ pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, 
         Err(error) => {
             return Err(error);
         }
+    }
+}
+
+#[cfg(test)]
+
+mod holidays_tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn get_holidays_test() {
+        let holidays = get_holidays("2022").await.unwrap();
+
+        let holyday = get_holiday("2022", "01", "01").await.unwrap();
+
+        assert!(holidays.contains(&holyday));
+    }
+
+    #[tokio::test]
+    async fn get_holidays_error_test() {
+        let holidays = get_holidays("2").await;
+
+        assert!(holidays.is_err());
+    }
+
+    #[tokio::test]
+    async fn get_holiday_test() {
+        let holiday = get_holiday("2022", "09", "07").await.unwrap();
+
+        assert_eq!(holiday.name, "Independência do Brasil");
+    }
+
+    #[tokio::test]
+    async fn get_holiday_error_test() {
+        let holiday = get_holiday("2022", "10", "02").await;
+
+        assert!(holiday.is_err());
     }
 }
