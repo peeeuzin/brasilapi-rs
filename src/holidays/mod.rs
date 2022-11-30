@@ -58,3 +58,49 @@ pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
 
     Ok(holidays)
 }
+
+/// ## `get_holiday(year: &str, month: &str, day: &str)`
+/// Retorna um feriado a partir de uma data.
+///
+/// ### Argumento
+/// * `year:&str`   => Ano do feriado.
+/// * `month:&str`  => Mês do feriado.
+/// * `day:&str`    => Dia do feriado.
+///
+/// ### Retorno
+/// * `Result<Holiday, UnexpectedError>`
+///
+/// # Example
+/// ```
+/// use brasilapi::holidays;
+/// use brasilapi::holidays::Holiday;
+///
+/// let holiday:Holiday = holidays::get_holiday("2022", "09", "07").await.unwrap();
+/// ```
+pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, UnexpectedError> {
+    let response = get_holidays(year).await;
+
+    match response {
+        Ok(holidays) => {
+            let holiday_position = holidays
+                .iter()
+                .position(|holiday| holiday.date == format!("{year}-{month}-{day}"));
+
+            match holiday_position {
+                Some(position) => {
+                    return Ok(holidays.get(position).unwrap().clone());
+                }
+                None => {
+                    return Err(UnexpectedError {
+                        code: 404,
+                        message: String::from("holiday not found"),
+                        error: Errored::Unexpected,
+                    });
+                }
+            }
+        }
+        Err(error) => {
+            return Err(error);
+        }
+    }
+}
