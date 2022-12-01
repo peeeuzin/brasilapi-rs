@@ -31,9 +31,8 @@ impl HolidayService {
 ///
 /// ### Retorno
 /// * `Result<Vec<Holiday>, UnexpectedError>`
-///
 /// # Example
-///  ```
+///  ```ignore
 /// use brasilapi::holidays;
 /// use brasilapi::holidays::Holiday;
 ///
@@ -71,7 +70,7 @@ pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
 /// * `Result<Holiday, UnexpectedError>`
 ///
 /// # Example
-/// ```
+/// ```ignore
 /// use brasilapi::holidays;
 /// use brasilapi::holidays::Holiday;
 ///
