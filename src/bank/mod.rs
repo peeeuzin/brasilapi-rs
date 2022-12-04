@@ -1,4 +1,4 @@
-use crate::spec::BRASIL_API_URL;
+use crate::{error::*, spec::BRASIL_API_URL};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -9,28 +9,6 @@ pub struct Bank {
 
     #[serde(rename = "fullName")]
     pub fullname: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct BankError {
-    pub name: Option<String>,
-    pub message: String,
-
-    #[serde(rename = "type")]
-    pub kind: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UnexpectedError {
-    pub code: u16,
-    pub message: String,
-    pub error: Errored,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Errored {
-    Unexpected,
-    NotFound(BankError),
 }
 
 pub struct BankService;
@@ -89,7 +67,7 @@ pub async fn get_bank(code: i32) -> Result<Bank, UnexpectedError> {
 
     if status == 404 {
         let body = response.text().await.unwrap();
-        let error: BankError = serde_json::from_str(&body).unwrap();
+        let error: Error = serde_json::from_str(&body).unwrap();
 
         return Err(UnexpectedError {
             code: status,
@@ -126,7 +104,7 @@ mod bank_tests {
     }
 
     #[tokio::test]
-    async fn get_ddd_error() {
+    async fn get_bank_error() {
         let bank = get_bank(2).await;
 
         assert!(bank.is_err());

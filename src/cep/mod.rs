@@ -1,6 +1,6 @@
-use crate::spec::BRASIL_API_URL;
-use serde::{Deserialize, Serialize};
+use crate::{error::*, spec::BRASIL_API_URL};
 use reqwest::StatusCode;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Cep {
@@ -32,31 +32,11 @@ pub struct CepError {
 
     #[serde(rename = "type")]
     pub kind: String,
-    pub errors: Vec<CepServiceError>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CepServiceError {
-    pub name: String,
-    pub message: String,
-    pub service: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Errored {
-    NotFound(CepError),
-    Unexpected,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UnexpectedError {
-    pub code: u16,
-    pub message: String,
-    pub error: Errored,
+    pub errors: Vec<Error>,
 }
 
 pub struct CepService {
-    base_url: String
+    base_url: String,
 }
 
 impl CepService {
@@ -71,7 +51,11 @@ impl CepService {
         reqwest::get(&url).await
     }
 
-    async fn dispatch(&self, response: reqwest::Response, cep_code: &str) -> Result<Cep, UnexpectedError> {
+    async fn dispatch(
+        &self,
+        response: reqwest::Response,
+        cep_code: &str,
+    ) -> Result<Cep, UnexpectedError> {
         match response.status() {
             StatusCode::OK => {
                 let body = response.text().await.unwrap();
@@ -81,7 +65,7 @@ impl CepService {
             }
             StatusCode::NOT_FOUND => {
                 let body = response.text().await.unwrap();
-                let cep_err: CepError = serde_json::from_str(&body).unwrap();
+                let cep_err: Error = serde_json::from_str(&body).unwrap();
 
                 Err(UnexpectedError {
                     code: 404,
@@ -93,7 +77,7 @@ impl CepService {
                 code: code.as_u16(),
                 message: format!("Unexpected error with code: {}", code),
                 error: Errored::Unexpected,
-            })
+            }),
         }
     }
 
@@ -164,16 +148,15 @@ mod cep_tests {
     async fn get_cep_unexpected_error() {
         let cep_code = "99999999";
         let server = MockServer::start_async().await;
-        let mock = server.mock_async(|when, then| {
-            when.method("GET")
-                .path(format!("/api/cep/v2/{}", cep_code));
-            then.status(500)
-                .json_body(json!({
+        let mock = server
+            .mock_async(|when, then| {
+                when.method("GET").path(format!("/api/cep/v2/{}", cep_code));
+                then.status(500).json_body(json!({
                     "name": "Internal Server Error",
                     "message": "Error interno do servidor",
                 }));
-        })
-        .await;
+            })
+            .await;
 
         let cep_service = CepService::new(&server.base_url());
         let response = cep_service.get_cep_request(cep_code);
@@ -196,16 +179,15 @@ mod cep_tests {
     async fn get_validate_unexpected_error() {
         let cep_code = "99999998";
         let server = MockServer::start_async().await;
-        let mock = server.mock_async(|when, then| {
-            when.method("GET")
-            .path(format!("/api/cep/v2/{}", cep_code));
-            then.status(500)
-            .json_body(json!({
-            "name": "Internal Server Error",
-            "message": "Error interno do servidor",
-            }));
-        })
-        .await;
+        let mock = server
+            .mock_async(|when, then| {
+                when.method("GET").path(format!("/api/cep/v2/{}", cep_code));
+                then.status(500).json_body(json!({
+                "name": "Internal Server Error",
+                "message": "Error interno do servidor",
+                }));
+            })
+            .await;
 
         let cep_service = CepService::new(&server.base_url());
         let response = cep_service.get_cep_request(cep_code);

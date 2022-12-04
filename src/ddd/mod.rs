@@ -1,4 +1,4 @@
-use crate::spec::BRASIL_API_URL;
+use crate::{error::*, spec::BRASIL_API_URL};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -14,27 +14,6 @@ pub struct Regiao {
     id: i32,
     sigla: String,
     nome: String,
-}
-
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct DddError {
-    message: String,
-    name: String,
-    #[serde(rename = "type")]
-    kind: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Errored {
-    NotFound(DddError),
-    Unexpected,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UnexpectedError {
-    pub code: u16,
-    pub message: String,
-    pub error: Errored,
 }
 
 pub struct DDDService;
@@ -61,7 +40,7 @@ pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
     let status = response.status().as_u16();
 
     if status != 200 {
-        let error: DddError = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+        let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
 
         return Err(UnexpectedError {
             code: status,
@@ -94,7 +73,7 @@ pub async fn ddd_exists(ddd: &str) -> Result<bool, UnexpectedError> {
     } else if status == 200 {
         Ok(true)
     } else {
-        let error: DddError = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+        let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
 
         Err(UnexpectedError {
             code: status,

@@ -1,4 +1,4 @@
-use crate::spec::BRASIL_API_URL;
+use crate::{error::*, spec::BRASIL_API_URL};
 use serde::{Deserialize, Serialize};
 
 pub struct CnpjService;
@@ -64,27 +64,6 @@ pub struct Qsa {
     codigo_qualificacao_representante_legal: Option<i32>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct CnpjError {
-    message: String,
-    name: String,
-    #[serde(rename = "type")]
-    kind: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Errored {
-    NotFound(CnpjError),
-    Unexpected,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UnexpectedError {
-    pub code: u16,
-    pub message: String,
-    pub error: Errored,
-}
-
 impl CnpjService {
     async fn get_cnpj_request(cnpj_code: &str) -> Result<reqwest::Response, reqwest::Error> {
         let url = format!("{}/api/cnpj/v1/{}", BRASIL_API_URL, cnpj_code);
@@ -104,7 +83,7 @@ pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, UnexpectedError> {
             Ok(cnpj)
         }
         404 => {
-            let error: CnpjError = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+            let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
 
             Err(UnexpectedError {
                 code: status,
@@ -113,7 +92,7 @@ pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, UnexpectedError> {
             })
         }
         _ => {
-            let error: CnpjError = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+            let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
 
             Err(UnexpectedError {
                 code: status,

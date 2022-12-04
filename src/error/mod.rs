@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Error {
     pub message: String,
-    pub name: String,
+    pub name: Option<String>,
 
     #[serde(rename = "type")]
     pub kind: String,
