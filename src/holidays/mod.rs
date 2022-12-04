@@ -32,11 +32,14 @@ impl HolidayService {
 /// ### Retorno
 /// * `Result<Vec<Holiday>, UnexpectedError>`
 /// # Example
-///  ```ignore
+///  ```
 /// use brasilapi::holidays;
 /// use brasilapi::holidays::Holiday;
 ///
-/// let holidays:Vec<Holiday> = holidays::get_holidays("2022").await.unwrap();
+/// #[tokio::main]
+/// async fn main() {
+///     let holidays:Vec<Holiday> = holidays::get_holidays("2022").await.unwrap();
+/// }
 /// ```
 pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
     let response = HolidayService::get_holiday_request(year).await.unwrap();
@@ -70,11 +73,14 @@ pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
 /// * `Result<Holiday, UnexpectedError>`
 ///
 /// # Example
-/// ```ignore
+/// ```
 /// use brasilapi::holidays;
 /// use brasilapi::holidays::Holiday;
 ///
-/// let holiday:Holiday = holidays::get_holiday("2022", "09", "07").await.unwrap();
+/// #[tokio::main]
+/// async fn main() {
+///     let holiday:Holiday = holidays::get_holiday("2022", "09", "07").await.unwrap();
+/// }
 /// ```
 pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, UnexpectedError> {
     let response = get_holidays(year).await;
@@ -89,18 +95,14 @@ pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, 
                 Some(position) => {
                     return Ok(holidays.get(position).unwrap().clone());
                 }
-                None => {
-                    Err(UnexpectedError {
-                        code: 404,
-                        message: String::from("holiday not found"),
-                        error: Errored::Unexpected,
-                    })
-                }
+                None => Err(UnexpectedError {
+                    code: 404,
+                    message: String::from("holiday not found"),
+                    error: Errored::Unexpected,
+                }),
             }
         }
-        Err(error) => {
-            Err(error)
-        }
+        Err(error) => Err(error),
     }
 }
 
