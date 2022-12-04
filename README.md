@@ -21,7 +21,7 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **Bank**
  - [x] **CNPJ**
  - [ ] **IBGE**
- - [ ] **Feriados Nacionais**
+ - [x] **Feriados Nacionais**
  - [ ] **Tabela FIPE**
  - [ ] **ISBN**
  - [ ] **Registros de domínios br**
