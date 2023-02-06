@@ -20,11 +20,11 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **DDD**
  - [x] **Bank**
  - [x] **CNPJ**
- - [ ] **IBGE**
  - [x] **Feriados Nacionais**
+ - [x] **Registros de domínios br**
+ - [ ] **IBGE**
  - [ ] **Tabela FIPE**
  - [ ] **ISBN**
- - [ ] **Registros de domínios br**
  - [ ] **Taxas**
 
 # Como contribuir
