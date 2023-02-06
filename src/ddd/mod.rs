@@ -25,7 +25,7 @@ impl DDDService {
     }
 }
 
-/// Get a DDD from the Brasil API
+/// Retorna um DDD da API do Brasil
 ///
 /// Argumentos:
 ///

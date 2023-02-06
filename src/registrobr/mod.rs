@@ -24,7 +24,7 @@ impl RegistroBrService {
     }
 }
 
-/// Get a domain by name from Brasil API
+/// Retorna informações sobre um domínio.
 ///
 /// Arguments:
 ///
