@@ -36,7 +36,7 @@ Adicione a seguinte linha ao seu `Cargo.toml`:
 
 ```toml
 [dependencies]
-brasilapi = "0.5.1"
+brasilapi = "0.5.2"
 ```
 
 # Autor
