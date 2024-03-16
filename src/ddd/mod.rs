@@ -49,15 +49,24 @@ impl DDDService {
     }
 }
 
-/// Retorna um DDD da API do Brasil
+/// ## `get_ddd(ddd: &str)`
+/// Retorna informações sobre um DDD.
 ///
-/// Argumentos:
+/// ### Argumento
+/// * `ddd:&str` => DDD para consulta.
 ///
-/// * `ddd`: DDD para ser consultado
+/// ### Retorno
+/// * `Result<Ddd, Error>`
 ///
-/// Retorna:
+/// # Exemplo
+/// ```rust
+/// use brasilapi::ddd;
 ///
-/// Result<Ddd, UnexpectedError>
+/// #[tokio::main]
+/// async fn main() {
+///   let ddd = ddd::get_ddd("61").await.unwrap();
+/// }
+/// ```
 pub async fn get_ddd(ddd: &str) -> Result<Ddd, Error> {
     let ddd_service = DDDService::new(BRASIL_API_URL);
 
@@ -69,15 +78,24 @@ pub async fn get_ddd(ddd: &str) -> Result<Ddd, Error> {
     Ok(ddd)
 }
 
-/// Retorna um booleano indicando se um DDD existe ou não
+/// ## `ddd_exists(ddd: &str)`
+/// Verifica se um DDD existe.
 ///
-/// Argumentos:
+/// ### Argumento
+/// * `ddd:&str` => DDD para consulta.
 ///
-/// * `ddd`: DDD a ser validado
+/// ### Retorno
+/// * `Result<bool, Error>`
 ///
-/// Retorna:
+/// # Exemplo
+/// ```rust
+/// use brasilapi::ddd;
 ///
-/// Result<bool, UnexpectedError>
+/// #[tokio::main]
+/// async fn main() {
+///     let ddd = ddd::ddd_exists("21").await.unwrap();
+/// }
+/// ```
 pub async fn ddd_exists(ddd: &str) -> Result<bool, Error> {
     let ddd_service = DDDService::new(BRASIL_API_URL);
 

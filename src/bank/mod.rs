@@ -41,11 +41,22 @@ impl BankService {
     }
 }
 
-/// Consulta todos os bancos cadastrados na Brasil API
+/// ## `get_all_banks()`
+/// Lista todos os bancos cadastrados.
 ///
-/// Retorna:
 ///
-/// Um vetor dos bancos cadastrados
+/// ### Retorno
+/// * `Result<Vec<Bank>, Error>`
+///
+/// # Exemplo
+///
+/// ```rust
+/// use brasilapi::bank::{self, Bank};
+///
+/// #[tokio::main]
+/// async fn main() {
+///    let banks:Vec<Bank> = bank::get_all_banks().await.unwrap();
+/// }
 pub async fn get_all_banks() -> Result<Vec<Bank>, Error> {
     let bank_service = BankService::new(BRASIL_API_URL);
 
@@ -57,15 +68,24 @@ pub async fn get_all_banks() -> Result<Vec<Bank>, Error> {
     Ok(banks)
 }
 
+/// ## `get_bank(code: i32)`
 /// Consulta um banco pelo seu código identificador
 ///
-/// Argumentos:
+/// ### Argumentos
+/// * `code:i32` => Código do banco.
 ///
-/// * `code`: Código do banco
+/// ### Retorno:
+/// * `Result<Bank, Error>`
 ///
-/// Retorna:
+/// # Exemplo
+/// ```rust
+/// use brasilapi::bank::{self, Bank};
 ///
-/// O banco correspondente ao código
+/// #[tokio::main]
+/// async fn main() {
+///   let bank:Bank = bank::get_bank(1).await.unwrap();
+/// }
+/// ```
 pub async fn get_bank(code: i32) -> Result<Bank, Error> {
     let bank_service = BankService::new(BRASIL_API_URL);
 

@@ -39,7 +39,8 @@ impl HolidayService {
 ///
 /// ### Retorno
 /// * `Result<Vec<Holiday>, Error>`
-/// # Example
+///
+/// # Exemplo
 ///  ```
 /// use brasilapi::holidays;
 /// use brasilapi::holidays::Holiday;

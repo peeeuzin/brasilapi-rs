@@ -36,15 +36,24 @@ impl RegistroBrService {
     }
 }
 
+/// ## `get_domain_by_name(name: &str)`
 /// Retorna informações sobre um domínio.
 ///
-/// Arguments:
+/// ### Argumento
+/// * `name:&str` => Nome do domínio para consulta.
 ///
-/// * `name`: The domain name to be searched.
+/// ### Retorno
+/// * `Result<Domain, Error>`
 ///
-/// Returns:
+/// # Exemplo
+/// ```
+/// use brasilapi::registrobr;
 ///
-/// A Domain struct
+/// #[tokio::main]
+/// async fn main() {
+///    let domain = registrobr::get_domain_by_name("google.com").await.unwrap();
+/// }
+/// ```
 pub async fn get_domain_by_name(name: &str) -> Result<Domain, Error> {
     let registro_br_service = RegistroBrService::new(BRASIL_API_URL);
 

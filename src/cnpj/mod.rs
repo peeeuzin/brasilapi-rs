@@ -83,6 +83,24 @@ impl CnpjService {
     }
 }
 
+/// ## `get_cnpj(cnpj: &str)`
+/// Consulta um CNPJ.
+///
+/// ### Argumento
+/// * `cnpj:&str` => CNPJ para consulta.
+///
+/// ### Retorno
+/// * `Result<Cnpj, Error>`
+///
+/// # Exemplo
+/// ```rust
+/// use brasilapi::cnpj;
+///
+/// #[tokio::main]
+/// async fn main() {
+///    let cnpj = cnpj::get_cnpj("00000000000191").await.unwrap();  
+/// }
+/// ```
 pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, Error> {
     let cnpj_service = CnpjService::new(BRASIL_API_URL);
 

@@ -67,15 +67,24 @@ impl CepService {
     }
 }
 
-/// Faz um GET Request para a API de CEP do Brasil API e retorna o CEP mais detalhado possível.
+/// ## `get_cep(cep_code: &str)`
+/// Consulta um CEP.
 ///
-/// Argumentos:
+/// ### Argumento
+/// * `cep_code:&str` => CEP para ser consultado.
 ///
-/// * `cep_code`: CEP para ser consultado
+/// ### Retorno
+/// * `Result<Cep, Error>`
 ///
-/// Retorna:
+/// # Exemplo
+/// ```
+/// use brasilapi::cep;
 ///
-/// O CEP consultado
+/// #[tokio::main]
+/// async fn main() {
+///    let cep = cep::get_cep("01001000").await.unwrap();
+/// }
+/// ```
 pub async fn get_cep(cep_code: &str) -> Result<Cep, Error> {
     let cep_service = CepService::new(BRASIL_API_URL);
 
@@ -87,15 +96,23 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, Error> {
     Ok(cep)
 }
 
-/// Faz um GET Request para a API de CEP do Brasil API e verifica se o CEP é valido (não é preciso se é válido ou não)
+/// ## `validate(cep_code: &str)`
+/// Valida um CEP.
 ///
-/// Argumentos:
+/// ### Argumento
+/// * `cep_code:&str` => CEP para ser validado.
 ///
-/// * `cep_code`: CEP a ser validado
+/// Retorno
+/// * `Result<bool, Error>`
 ///
-/// Retorna:
+/// # Exemplo
+/// ```
+/// use brasilapi::cep;
 ///
-/// Um resultado com valor booleano indicando se o CEP é válido ou não ou o mapeamento do erro.
+/// #[tokio::main]
+/// async fn main() {
+///   let is_valid = cep::validate("01001000").await.unwrap();  
+/// }
 pub async fn validate(cep_code: &str) -> Result<bool, Error> {
     let cep_service = CepService::new(BRASIL_API_URL);
     cep_service.validate_cep(cep_code).await
