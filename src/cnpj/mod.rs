@@ -1,8 +1,6 @@
 use crate::{error::*, spec::BRASIL_API_URL};
 use serde::{Deserialize, Serialize};
 
-pub struct CnpjService;
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Cnpj {
     cnpj: Option<String>,
@@ -64,43 +62,36 @@ pub struct Qsa {
     codigo_qualificacao_representante_legal: Option<i32>,
 }
 
+pub struct CnpjService {
+    base_url: String,
+}
+
 impl CnpjService {
-    async fn get_cnpj_request(cnpj_code: &str) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/cnpj/v1/{}", BRASIL_API_URL, cnpj_code);
-        reqwest::get(&url).await
+    pub fn new(base_url: &str) -> Self {
+        Self {
+            base_url: base_url.to_string(),
+        }
+    }
+
+    async fn get_cnpj_request(&self, cnpj_code: &str) -> Result<reqwest::Response, Error> {
+        let url = format!("{}/api/cnpj/v1/{}", self.base_url, cnpj_code);
+
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
+        }
     }
 }
 
-pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, UnexpectedError> {
-    let response = CnpjService::get_cnpj_request(cnpj).await.unwrap();
+pub async fn get_cnpj(cnpj: &str) -> Result<Cnpj, Error> {
+    let cnpj_service = CnpjService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
+    let response = cnpj_service.get_cnpj_request(cnpj).await?;
 
-    match status {
-        200 => {
-            let cnpj: Cnpj = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+    let body = response.text().await.unwrap();
+    let cnpj: Cnpj = serde_json::from_str(&body).unwrap();
 
-            Ok(cnpj)
-        }
-        404 => {
-            let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
-
-            Err(UnexpectedError {
-                code: status,
-                message: error.clone().message,
-                error: Errored::NotFound(error),
-            })
-        }
-        _ => {
-            let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
-
-            Err(UnexpectedError {
-                code: status,
-                message: error.message,
-                error: Errored::Unexpected,
-            })
-        }
-    }
+    Ok(cnpj)
 }
 
 #[cfg(test)]

@@ -1,7 +1,4 @@
-use crate::{
-    error::{Error, Errored, UnexpectedError},
-    spec::BRASIL_API_URL,
-};
+use crate::{error::*, spec::BRASIL_API_URL};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
@@ -13,13 +10,24 @@ pub struct Holiday {
     full_name: Option<String>,
 }
 
-pub struct HolidayService;
+pub struct HolidayService {
+    base_url: String,
+}
 
 impl HolidayService {
-    async fn get_holiday_request(year: &str) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/feriados/v1/{}", BRASIL_API_URL, year);
+    pub fn new(base_url: &str) -> Self {
+        Self {
+            base_url: base_url.to_string(),
+        }
+    }
 
-        reqwest::get(&url).await
+    async fn get_holiday_request(&self, year: &str) -> Result<reqwest::Response, Error> {
+        let url = format!("{}/api/feriados/v1/{}", self.base_url, year);
+
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
+        }
     }
 }
 
@@ -30,7 +38,7 @@ impl HolidayService {
 /// * `year:&str` => Ano para calcular os feriados.
 ///
 /// ### Retorno
-/// * `Result<Vec<Holiday>, UnexpectedError>`
+/// * `Result<Vec<Holiday>, Error>`
 /// # Example
 ///  ```
 /// use brasilapi::holidays;
@@ -41,22 +49,13 @@ impl HolidayService {
 ///     let holidays:Vec<Holiday> = holidays::get_holidays("2022").await.unwrap();
 /// }
 /// ```
-pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
-    let response = HolidayService::get_holiday_request(year).await.unwrap();
+pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, Error> {
+    let holiday_service = HolidayService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
+    let response = holiday_service.get_holiday_request(year).await?;
 
-    if status != 200 {
-        let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
-
-        return Err(UnexpectedError {
-            code: status,
-            message: error.clone().message,
-            error: Errored::NotFound(error),
-        });
-    }
-
-    let holidays: Vec<Holiday> = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+    let body = response.text().await.unwrap();
+    let holidays: Vec<Holiday> = serde_json::from_str(&body).unwrap();
 
     Ok(holidays)
 }
@@ -70,7 +69,7 @@ pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
 /// * `day:&str`    => Dia do feriado.
 ///
 /// ### Retorno
-/// * `Result<Holiday, UnexpectedError>`
+/// * `Result<Holiday, Error>`
 ///
 /// # Example
 /// ```
@@ -82,27 +81,22 @@ pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, UnexpectedError> {
 ///     let holiday:Holiday = holidays::get_holiday("2022", "09", "07").await.unwrap();
 /// }
 /// ```
-pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, UnexpectedError> {
-    let response = get_holidays(year).await;
+pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, Error> {
+    let holidays = get_holidays(year).await?;
 
-    match response {
-        Ok(holidays) => {
-            let holiday_position = holidays
-                .iter()
-                .position(|holiday| holiday.date == format!("{year}-{month}-{day}"));
+    let holiday_position = holidays
+        .iter()
+        .position(|holiday| holiday.date == format!("{year}-{month}-{day}"));
 
-            match holiday_position {
-                Some(position) => {
-                    return Ok(holidays.get(position).unwrap().clone());
-                }
-                None => Err(UnexpectedError {
-                    code: 404,
-                    message: String::from("holiday not found"),
-                    error: Errored::Unexpected,
-                }),
-            }
+    match holiday_position {
+        Some(position) => {
+            return Ok(holidays.get(position).unwrap().clone());
         }
-        Err(error) => Err(error),
+        None => Err(Error {
+            code: Some(404),
+            message: String::from("holiday not found"),
+            error: Errored::NotFound,
+        }),
     }
 }
 

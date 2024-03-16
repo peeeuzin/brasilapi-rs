@@ -1,5 +1,4 @@
 use crate::{error::*, spec::BRASIL_API_URL};
-use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -40,55 +39,30 @@ pub struct CepService {
 }
 
 impl CepService {
-    fn new(base_url: &str) -> CepService {
-        CepService {
+    pub fn new(base_url: &str) -> Self {
+        Self {
             base_url: base_url.to_string(),
         }
     }
 
-    async fn get_cep_request(&self, cep_code: &str) -> Result<reqwest::Response, reqwest::Error> {
+    async fn get_cep_request(&self, cep_code: &str) -> Result<reqwest::Response, Error> {
         let url = format!("{}/api/cep/v2/{}", self.base_url, cep_code);
-        reqwest::get(&url).await
-    }
 
-    async fn dispatch(
-        &self,
-        response: reqwest::Response,
-        cep_code: &str,
-    ) -> Result<Cep, UnexpectedError> {
-        match response.status() {
-            StatusCode::OK => {
-                let body = response.text().await.unwrap();
-                let cep: Cep = serde_json::from_str(&body).unwrap();
-
-                Ok(cep)
-            }
-            StatusCode::NOT_FOUND => {
-                let body = response.text().await.unwrap();
-                let cep_err: Error = serde_json::from_str(&body).unwrap();
-
-                Err(UnexpectedError {
-                    code: 404,
-                    message: format!("Not founded cep: {}", cep_code),
-                    error: Errored::NotFound(cep_err),
-                })
-            }
-            code => Err(UnexpectedError {
-                code: code.as_u16(),
-                message: format!("Unexpected error with code: {}", code),
-                error: Errored::Unexpected,
-            }),
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
         }
     }
 
-    async fn validate(&self, response: reqwest::Response) -> Result<bool, UnexpectedError> {
-        match response.status() {
-            StatusCode::OK => Ok(true),
-            code => Err(UnexpectedError {
-                code: code.as_u16(),
-                message: format!("Unexpected error with code: {}", code),
-                error: Errored::Unexpected,
-            }),
+    async fn validate_cep(&self, cep_code: &str) -> Result<bool, Error> {
+        let response = self.get_cep_request(cep_code).await;
+
+        match response {
+            Ok(_) => Ok(true),
+            Err(e) => match e.code {
+                Some(404) => Ok(false),
+                _ => Err(e),
+            },
         }
     }
 }
@@ -101,11 +75,16 @@ impl CepService {
 ///
 /// Retorna:
 ///
-/// Result<Cep, UnexpectedError>
-pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
+/// O CEP consultado
+pub async fn get_cep(cep_code: &str) -> Result<Cep, Error> {
     let cep_service = CepService::new(BRASIL_API_URL);
-    let response = cep_service.get_cep_request(cep_code).await.unwrap();
-    cep_service.dispatch(response, cep_code).await
+
+    let response = cep_service.get_cep_request(cep_code).await?;
+
+    let body = response.text().await.unwrap();
+    let cep: Cep = serde_json::from_str(&body).unwrap();
+
+    Ok(cep)
 }
 
 /// Faz um GET Request para a API de CEP do Brasil API e verifica se o CEP é valido (não é preciso se é válido ou não)
@@ -117,16 +96,16 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, UnexpectedError> {
 /// Retorna:
 ///
 /// Um resultado com valor booleano indicando se o CEP é válido ou não ou o mapeamento do erro.
-pub async fn validate(cep_code: &str) -> Result<bool, UnexpectedError> {
+pub async fn validate(cep_code: &str) -> Result<bool, Error> {
     let cep_service = CepService::new(BRASIL_API_URL);
-    let response = cep_service.get_cep_request(cep_code).await.unwrap();
-    cep_service.validate(response).await
+    cep_service.validate_cep(cep_code).await
 }
 
 #[cfg(test)]
 mod cep_tests {
     use super::*;
     use httpmock::MockServer;
+    use reqwest::StatusCode;
     use serde_json::json;
 
     #[tokio::test]
@@ -159,13 +138,15 @@ mod cep_tests {
             .await;
 
         let cep_service = CepService::new(&server.base_url());
-        let response = cep_service.get_cep_request(cep_code);
-        let result = cep_service.dispatch(response.await.unwrap(), cep_code);
-        let expectation = result.await.unwrap_err();
+        let response = cep_service.get_cep_request(cep_code).await;
+        let expectation = response.unwrap_err();
 
         mock.assert_async().await;
 
-        assert_eq!(expectation.code, StatusCode::INTERNAL_SERVER_ERROR.as_u16());
+        assert_eq!(
+            expectation.code,
+            Some(StatusCode::INTERNAL_SERVER_ERROR.as_u16())
+        );
     }
 
     #[tokio::test]
@@ -190,12 +171,14 @@ mod cep_tests {
             .await;
 
         let cep_service = CepService::new(&server.base_url());
-        let response = cep_service.get_cep_request(cep_code);
-        let result = cep_service.validate(response.await.unwrap());
-        let expectation = result.await.unwrap_err();
+        let response = cep_service.get_cep_request(cep_code).await;
+        let expectation = response.unwrap_err();
 
         mock.assert_async().await;
 
-        assert_eq!(expectation.code, StatusCode::INTERNAL_SERVER_ERROR.as_u16());
+        assert_eq!(
+            expectation.code,
+            Some(StatusCode::INTERNAL_SERVER_ERROR.as_u16())
+        );
     }
 }

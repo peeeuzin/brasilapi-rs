@@ -4,24 +4,40 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq)]
 pub struct Bank {
     pub ispb: String,
-    pub name: String,
+    pub name: Option<String>,
     pub code: Option<i32>,
 
     #[serde(rename = "fullName")]
-    pub fullname: String,
+    pub fullname: Option<String>,
 }
 
-pub struct BankService;
+pub struct BankService {
+    base_url: String,
+}
 
 impl BankService {
-    async fn get_all_banks() -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/banks/v1", BRASIL_API_URL);
-        reqwest::get(&url).await
+    pub fn new(base_url: &str) -> Self {
+        Self {
+            base_url: base_url.to_string(),
+        }
     }
 
-    async fn get_bank_by_code(code: i32) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/banks/v1/{}", BRASIL_API_URL, code);
-        reqwest::get(&url).await
+    async fn get_all_banks(&self) -> Result<reqwest::Response, Error> {
+        let url = format!("{}/api/banks/v1", self.base_url);
+
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
+        }
+    }
+
+    async fn get_bank_by_code(&self, code: i32) -> Result<reqwest::Response, Error> {
+        let url = format!("{}/api/banks/v1/{}", self.base_url, code);
+
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
+        }
     }
 }
 
@@ -29,21 +45,11 @@ impl BankService {
 ///
 /// Retorna:
 ///
-/// Result<Vec<Bank>, UnexpectedError>
-pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
-    let response = BankService::get_all_banks().await.unwrap();
+/// Um vetor dos bancos cadastrados
+pub async fn get_all_banks() -> Result<Vec<Bank>, Error> {
+    let bank_service = BankService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
-
-    if status != 200 {
-        let body = response.text().await.unwrap();
-
-        return Err(UnexpectedError {
-            code: status,
-            message: body,
-            error: Errored::Unexpected,
-        });
-    }
+    let response = bank_service.get_all_banks().await?;
 
     let body = response.text().await.unwrap();
     let banks: Vec<Bank> = serde_json::from_str(&body).unwrap();
@@ -51,7 +57,7 @@ pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
     Ok(banks)
 }
 
-/// Consulta um banco pelo seu código
+/// Consulta um banco pelo seu código identificador
 ///
 /// Argumentos:
 ///
@@ -59,30 +65,11 @@ pub async fn get_all_banks() -> Result<Vec<Bank>, UnexpectedError> {
 ///
 /// Retorna:
 ///
-/// Result<Bank, UnexpectedError>
-pub async fn get_bank(code: i32) -> Result<Bank, UnexpectedError> {
-    let response = BankService::get_bank_by_code(code).await.unwrap();
+/// O banco correspondente ao código
+pub async fn get_bank(code: i32) -> Result<Bank, Error> {
+    let bank_service = BankService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
-
-    if status == 404 {
-        let body = response.text().await.unwrap();
-        let error: Error = serde_json::from_str(&body).unwrap();
-
-        return Err(UnexpectedError {
-            code: status,
-            message: error.clone().message,
-            error: Errored::NotFound(error),
-        });
-    } else if status != 200 {
-        let body = response.text().await.unwrap();
-
-        return Err(UnexpectedError {
-            code: status,
-            message: body,
-            error: Errored::Unexpected,
-        });
-    }
+    let response = bank_service.get_bank_by_code(code).await?;
 
     let body = response.text().await.unwrap();
     let bank: Bank = serde_json::from_str(&body).unwrap();

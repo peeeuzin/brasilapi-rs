@@ -16,12 +16,36 @@ pub struct Regiao {
     nome: String,
 }
 
-pub struct DDDService;
+pub struct DDDService {
+    base_url: String,
+}
 
 impl DDDService {
-    async fn get_cep_request(ddd: &str) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/ddd/v1/{}", BRASIL_API_URL, ddd);
-        reqwest::get(&url).await
+    pub fn new(base_url: &str) -> Self {
+        Self {
+            base_url: base_url.to_string(),
+        }
+    }
+
+    async fn get_ddd_request(&self, ddd: &str) -> Result<reqwest::Response, Error> {
+        let url = format!("{}/api/ddd/v1/{}", self.base_url, ddd);
+
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
+        }
+    }
+
+    async fn validate_ddd(&self, ddd: &str) -> Result<bool, Error> {
+        let response = self.get_ddd_request(ddd).await;
+
+        match response {
+            Ok(_) => Ok(true),
+            Err(e) => match e.code {
+                Some(404) => Ok(false),
+                _ => Err(e),
+            },
+        }
     }
 }
 
@@ -34,22 +58,13 @@ impl DDDService {
 /// Retorna:
 ///
 /// Result<Ddd, UnexpectedError>
-pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
-    let response = DDDService::get_cep_request(ddd).await.unwrap();
+pub async fn get_ddd(ddd: &str) -> Result<Ddd, Error> {
+    let ddd_service = DDDService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
+    let response = ddd_service.get_ddd_request(ddd).await?;
 
-    if status != 200 {
-        let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
-
-        return Err(UnexpectedError {
-            code: status,
-            message: error.clone().message,
-            error: Errored::NotFound(error),
-        });
-    }
-
-    let ddd: Ddd = serde_json::from_str(&response.text().await.unwrap()).unwrap();
+    let body = response.text().await.unwrap();
+    let ddd: Ddd = serde_json::from_str(&body).unwrap();
 
     Ok(ddd)
 }
@@ -63,24 +78,12 @@ pub async fn get_ddd(ddd: &str) -> Result<Ddd, UnexpectedError> {
 /// Retorna:
 ///
 /// Result<bool, UnexpectedError>
-pub async fn ddd_exists(ddd: &str) -> Result<bool, UnexpectedError> {
-    let response = DDDService::get_cep_request(ddd).await.unwrap();
+pub async fn ddd_exists(ddd: &str) -> Result<bool, Error> {
+    let ddd_service = DDDService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
+    let response = ddd_service.validate_ddd(ddd).await?;
 
-    if status == 404 {
-        Ok(false)
-    } else if status == 200 {
-        Ok(true)
-    } else {
-        let error: Error = serde_json::from_str(&response.text().await.unwrap()).unwrap();
-
-        Err(UnexpectedError {
-            code: status,
-            message: error.clone().message,
-            error: Errored::NotFound(error),
-        })
-    }
+    Ok(response)
 }
 
 #[cfg(test)]

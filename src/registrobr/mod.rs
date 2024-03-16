@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Domain {
-    status_code: String,
+    status_code: u16,
     status: String,
     fqdn: String,
     suggestions: Option<Vec<String>>,
@@ -15,12 +15,24 @@ pub struct Domain {
     reasons: Option<Vec<String>>,
 }
 
-pub struct RegistroBrService;
+pub struct RegistroBrService {
+    base_url: String,
+}
 
 impl RegistroBrService {
-    async fn get_domain_by_name(name: &str) -> Result<reqwest::Response, reqwest::Error> {
-        let url = format!("{}/api/registrobr/v1/{}", BRASIL_API_URL, name);
-        reqwest::get(&url).await
+    pub fn new(base_url: &str) -> Self {
+        Self {
+            base_url: base_url.to_string(),
+        }
+    }
+
+    async fn get_domain_by_name(&self, name: &str) -> Result<reqwest::Response, Error> {
+        let url = format!("{}/api/registrobr/v1/{}", self.base_url, name);
+
+        match reqwest::get(&url).await {
+            Ok(response) => Error::from_response(response).await,
+            Err(e) => Err(Error::from_error(e)),
+        }
     }
 }
 
@@ -33,20 +45,10 @@ impl RegistroBrService {
 /// Returns:
 ///
 /// A Domain struct
-pub async fn get_domain_by_name(name: &str) -> Result<Domain, UnexpectedError> {
-    let response = RegistroBrService::get_domain_by_name(name).await.unwrap();
+pub async fn get_domain_by_name(name: &str) -> Result<Domain, Error> {
+    let registro_br_service = RegistroBrService::new(BRASIL_API_URL);
 
-    let status = response.status().as_u16();
-
-    if status != 200 {
-        let body = response.text().await.unwrap();
-
-        return Err(UnexpectedError {
-            code: status,
-            message: body,
-            error: Errored::Unexpected,
-        });
-    }
+    let response = registro_br_service.get_domain_by_name(name).await?;
 
     let body = response.text().await.unwrap();
     let domain: Domain = serde_json::from_str(&body).unwrap();
@@ -62,7 +64,7 @@ mod registrobr_tests {
     async fn test_get_domain_by_name() {
         let domain = get_domain_by_name("google.com").await.unwrap();
 
-        assert_eq!(domain.status_code, "2");
+        assert_eq!(domain.status_code, 2);
         assert_eq!(domain.status, "REGISTERED");
         assert_eq!(domain.fqdn, "google.com.br");
     }
