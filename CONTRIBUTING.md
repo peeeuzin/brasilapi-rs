@@ -13,6 +13,3 @@ Toda ajuda é bem-vinda, seja ela pequena ou grande. Se você quer contribuir co
 4. Abra um pull request no repositório original
 
 Agora é só esperar a análise do seu código e aguardar a aprovação do seu pull request.
-
-# Algumas resalvas
- - Toda feature deve ter documentação e testes unitários.
