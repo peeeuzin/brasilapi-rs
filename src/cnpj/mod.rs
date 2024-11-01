@@ -83,8 +83,8 @@ impl CnpjService {
     }
 }
 
-/// ## `get_cnpj(cnpj: &str)`
-/// Consulta um CNPJ.
+/// #### `get_cnpj(cnpj: &str)`
+/// Busca por CNPJ na API Minha Receita.
 ///
 /// ### Argumento
 /// * `cnpj:&str` => CNPJ para consulta.

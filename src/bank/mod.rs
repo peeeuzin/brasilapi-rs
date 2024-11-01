@@ -41,8 +41,8 @@ impl BankService {
     }
 }
 
-/// ## `get_all_banks()`
-/// Lista todos os bancos cadastrados.
+/// #### `get_all_banks()`
+/// Retorna informações de todos os bancos do Brasil
 ///
 ///
 /// ### Retorno
@@ -68,8 +68,8 @@ pub async fn get_all_banks() -> Result<Vec<Bank>, Error> {
     Ok(banks)
 }
 
-/// ## `get_bank(code: i32)`
-/// Consulta um banco pelo seu código identificador
+/// #### `get_bank(code: i32)`
+/// Busca as informações de um banco a partir de um código
 ///
 /// ### Argumentos
 /// * `code:i32` => Código do banco.

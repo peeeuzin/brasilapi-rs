@@ -49,8 +49,8 @@ impl DDDService {
     }
 }
 
-/// ## `get_ddd(ddd: &str)`
-/// Retorna informações sobre um DDD.
+/// #### `get_ddd(ddd: &str)`
+/// Retorna estado e lista de cidades por DDD
 ///
 /// ### Argumento
 /// * `ddd:&str` => DDD para consulta.
@@ -78,7 +78,7 @@ pub async fn get_ddd(ddd: &str) -> Result<Ddd, Error> {
     Ok(ddd)
 }
 
-/// ## `ddd_exists(ddd: &str)`
+/// #### `ddd_exists(ddd: &str)`
 /// Verifica se um DDD existe.
 ///
 /// ### Argumento

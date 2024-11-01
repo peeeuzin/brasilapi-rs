@@ -31,7 +31,7 @@ impl HolidayService {
     }
 }
 
-/// ## `get_holidays(year: &str)`
+/// #### `get_holidays(year: &str)`
 /// Lista os feriados nacionais de determinado ano.
 ///
 /// ### Argumento
@@ -61,7 +61,7 @@ pub async fn get_holidays(year: &str) -> Result<Vec<Holiday>, Error> {
     Ok(holidays)
 }
 
-/// ## `get_holiday(year: &str, month: &str, day: &str)`
+/// #### `get_holiday(year: &str, month: &str, day: &str)`
 /// Retorna um feriado a partir de uma data.
 ///
 /// ### Argumento

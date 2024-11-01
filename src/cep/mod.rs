@@ -67,8 +67,10 @@ impl CepService {
     }
 }
 
-/// ## `get_cep(cep_code: &str)`
-/// Consulta um CEP.
+/// #### `get_cep(cep_code: &str)`
+/// Busca por CEP com múltiplos providers de fallback.
+///
+/// A busca utiliza como fonte principal o OpenCep, caso não encontre o CEP é buscado em diversos outros providers de CEP.
 ///
 /// ### Argumento
 /// * `cep_code:&str` => CEP para ser consultado.
@@ -96,7 +98,7 @@ pub async fn get_cep(cep_code: &str) -> Result<Cep, Error> {
     Ok(cep)
 }
 
-/// ## `validate(cep_code: &str)`
+/// #### `validate(cep_code: &str)`
 /// Valida um CEP.
 ///
 /// ### Argumento
