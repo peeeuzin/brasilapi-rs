@@ -23,6 +23,7 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **IBGE**
  - [x] **Feriados Nacionais**
  - [ ] **Tabela FIPE**
+ - [x] **Corretoras (CVM)**
  - [ ] **ISBN**
  - [x] **Registros de domínios br**
  - [ ] **Taxas**
