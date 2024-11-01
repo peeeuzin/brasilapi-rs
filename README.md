@@ -22,10 +22,11 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **CNPJ**
  - [x] **IBGE**
  - [x] **Feriados Nacionais**
- - [ ] **Tabela FIPE**
  - [x] **Corretoras (CVM)**
- - [ ] **ISBN**
  - [x] **Registros de domínios br**
+ - [x] **PIX**
+ - [ ] **Tabela FIPE**
+ - [ ] **ISBN**
  - [ ] **Taxas**
 
 # Como contribuir

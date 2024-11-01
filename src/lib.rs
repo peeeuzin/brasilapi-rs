@@ -6,5 +6,6 @@ pub mod ddd;
 pub mod error;
 pub mod holidays;
 pub mod ibge;
+pub mod pix;
 pub mod registrobr;
 pub mod spec;

@@ -61,11 +61,11 @@ impl CorretorasService {
 ///
 /// # Exemplo
 /// ```rust
-/// use brasilapi::corretoras;
+/// use brasilapi::corretoras::{self, Corretora};
 ///
 /// #[tokio::main]
 /// async fn main() {
-///    let corretoras:Vec<Corretora> = corretoras::get_corretoras().await.unwrap();
+///    let corretoras: Vec<Corretora> = corretoras::get_corretoras().await.unwrap();
 /// }
 ///
 /// ```
@@ -91,11 +91,11 @@ pub async fn get_corretoras() -> Result<Vec<Corretora>, Error> {
 ///
 /// # Exemplo
 /// ```rust
-/// use brasilapi::corretoras;
+/// use brasilapi::corretoras::{self, Corretora};
 ///
 /// #[tokio::main]
 /// async fn main() {
-///   let corretora: Corretora = corretoras::get_corretora("00000000000191").await.unwrap();
+///   let corretora: Corretora = corretoras::get_corretora("02332886000104").await.unwrap();
 /// }
 ///
 /// ```
