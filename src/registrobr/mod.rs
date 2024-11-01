@@ -36,7 +36,7 @@ impl RegistroBrService {
     }
 }
 
-/// ## `get_domain_by_name(name: &str)`
+/// #### `get_domain_by_name(name: &str)`
 /// Retorna informações sobre um domínio.
 ///
 /// ### Argumento
