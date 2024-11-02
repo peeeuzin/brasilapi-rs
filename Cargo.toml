@@ -1,6 +1,6 @@
 [package]
 name = "brasilapi"
-version = "0.6.0"
+version = "0.7.0-alpha.0"
 edition = "2021"
 license = "MIT"
 homepage = "https://brasilapi.com.br"
