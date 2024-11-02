@@ -41,6 +41,33 @@ Adicione a seguinte linha ao seu `Cargo.toml`:
 brasilapi = "0.6.0"
 ```
 
+# Exemplos
+Atualmente o brasilapi-rs utiliza `async/await` para fazer as requisições, então você precisa de um runtime async para rodar o código, como o [tokio](https://crates.io/crates/tokio).
+
+
+```rust
+use brasilapi::cep;
+
+#[tokio::main]
+async fn main() {
+    let cep = cep::get_cep("01001000").await.unwrap();
+
+    println!("Estado: {}", cep.state);
+    println!("Cidade: {}", cep.city);
+    println!("Bairro: {}", cep.neighborhood);
+    println!("Rua: {}", cep.street);
+    println!("Service: {}", cep.service);
+
+    // Verificar se o CEP é válido
+    let is_valid = cep::validate("01001000").await.unwrap();
+    println!("CEP é válido: {}", is_valid);
+}
+```
+
+# Documentação
+Veja a documentação completa em [docs.rs](https://docs.rs/brasilapi)
+
+
 # Autor
 <div align="center">
 
