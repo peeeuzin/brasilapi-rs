@@ -112,6 +112,8 @@ pub async fn get_corretora(cnpj: &str) -> Result<Corretora, Error> {
 
 #[cfg(test)]
 mod corretoras_tests {
+    use crate::error::BrasilAPIError;
+
     use super::*;
 
     #[tokio::test]
@@ -126,5 +128,21 @@ mod corretoras_tests {
         let corretora = get_corretora("02332886000104").await.unwrap();
         assert_eq!(corretora.cnpj, "02332886000104");
         assert_eq!(corretora.nome_social, "XP INVESTIMENTOS CCTVM S.A.");
+    }
+
+    #[tokio::test]
+    async fn get_corretora_not_found_test() {
+        let corretora = get_corretora("00000000000000").await;
+
+        assert!(corretora.is_err());
+
+        assert_eq!(
+            corretora.err().unwrap().api_error,
+            Some(BrasilAPIError {
+                kind: "exchange_error".to_string(),
+                message: "Nenhuma corretora localizada".to_string(),
+                name: Some("EXCHANGE_NOT_FOUND".to_string()),
+            })
+        )
     }
 }

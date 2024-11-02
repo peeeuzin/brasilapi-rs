@@ -93,11 +93,11 @@ pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, 
         Some(position) => {
             return Ok(holidays.get(position).unwrap().clone());
         }
-        None => Err(Error {
-            code: Some(404),
-            message: String::from("holiday not found"),
-            error: Errored::NotFound,
-        }),
+        None => Err(Error::new(
+            String::from("holiday not found"),
+            Errored::NotFound,
+            Some(404),
+        )),
     }
 }
 
