@@ -30,6 +30,7 @@
 //! * [Cnpj](cnpj/index.html) - Busca dados de empresas por CNPJ
 //! * [Corretoras](corretoras/index.html) - Informações referentes a Corretoras ativas listadas na CVM
 //! * [Ddd](ddd/index.html) - Informações relacionadas a DDDs
+//! * [Fipe](fipe/index.html) - Informações sobre Preço Médio de Veículos fornecido pela FIPE (Fundação Instituto de Pesquisas Econômicas)
 //! * [Holidays](holidays/index.html) - Informações sobre feriados nacionais
 //! * [Ibge](ibge/index.html) - Informações sobre estados Provenientes do IBGE
 //! * [Pix](pix/index.html) - Informações referentes ao PIX
@@ -41,6 +42,7 @@ pub mod cnpj;
 pub mod corretoras;
 pub mod ddd;
 pub mod error;
+pub mod fipe;
 pub mod holidays;
 pub mod ibge;
 pub mod pix;
