@@ -25,7 +25,7 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **Corretoras (CVM)**
  - [x] **Registros de domínios br**
  - [x] **PIX**
- - [ ] **Tabela FIPE**
+ - [x] **Tabela FIPE**
  - [ ] **ISBN**
  - [ ] **Taxas**
 
