@@ -33,6 +33,7 @@
 //! * [Fipe](fipe/index.html) - Informações sobre Preço Médio de Veículos fornecido pela FIPE (Fundação Instituto de Pesquisas Econômicas)
 //! * [Holidays](holidays/index.html) - Informações sobre feriados nacionais
 //! * [Ibge](ibge/index.html) - Informações sobre estados Provenientes do IBGE
+//! * [Isbn](isbn/index.html) - Informações referentes a ISBNs
 //! * [Pix](pix/index.html) - Informações referentes ao PIX
 //! * [Registrobr](registrobr/index.html) - Avalia um dominio no registro.br
 //! * [Error](error/index.html) - Estrutura de erros da biblioteca
@@ -45,6 +46,7 @@ pub mod error;
 pub mod fipe;
 pub mod holidays;
 pub mod ibge;
+pub mod isbn;
 pub mod pix;
 pub mod registrobr;
 pub mod spec;
