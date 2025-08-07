@@ -133,7 +133,7 @@ pub async fn get_isbn(isbn_code: &str) -> Result<Isbn, Error> {
 ///
 /// # Exemplo
 /// ```
-/// use brasilapi::cep;
+/// use brasilapi::isbn;
 ///
 /// #[tokio::main]
 /// async fn main() {
