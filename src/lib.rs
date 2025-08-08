@@ -49,4 +49,6 @@ pub mod ibge;
 pub mod isbn;
 pub mod pix;
 pub mod registrobr;
+pub mod taxas;
+
 pub mod spec;

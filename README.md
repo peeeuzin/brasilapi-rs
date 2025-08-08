@@ -16,18 +16,21 @@
 Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://github.com/BrasilAPI/BrasilAPI) (para o Rust)
 
 # Features
- - [x] **CEP (Zip code)**
- - [x] **DDD**
  - [x] **Bank**
+ - [ ] **Cambio**
+ - [x] **CEP (Zip code)**
  - [x] **CNPJ**
- - [x] **IBGE**
- - [x] **Feriados Nacionais**
  - [x] **Corretoras (CVM)**
- - [x] **Registros de domínios br**
- - [x] **PIX**
+ - [ ] **CPTEC**
+ - [x] **DDD**
+ - [x] **Feriados Nacionais**
  - [x] **Tabela FIPE**
+ - [x] **IBGE**
  - [x] **ISBN**
- - [ ] **Taxas**
+ - [ ] **NCM**
+ - [x] **PIX**
+ - [x] **Registros de domínios br**
+ - [x] **Taxas**
 
 # Como contribuir
 Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para ver como contribuir com o projeto.
