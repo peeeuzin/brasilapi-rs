@@ -90,9 +90,7 @@ pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, 
         .position(|holiday| holiday.date == format!("{year}-{month}-{day}"));
 
     match holiday_position {
-        Some(position) => {
-            return Ok(holidays.get(position).unwrap().clone());
-        }
+        Some(position) => Ok(holidays.get(position).unwrap().clone()),
         None => Err(Error::new(
             String::from("holiday not found"),
             Errored::NotFound,
@@ -102,7 +100,6 @@ pub async fn get_holiday(year: &str, month: &str, day: &str) -> Result<Holiday, 
 }
 
 #[cfg(test)]
-
 mod holidays_tests {
     use super::*;
 

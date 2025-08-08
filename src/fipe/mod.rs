@@ -69,7 +69,7 @@ impl FipeService {
         let vehicle_type = vehicle_type.to_string();
 
         let reference_table = match reference_table {
-            Some(reference_table) => format!("tabela_referencia={}", reference_table),
+            Some(reference_table) => format!("tabela_referencia={reference_table}"),
             None => "".to_string(),
         };
 
@@ -90,7 +90,7 @@ impl FipeService {
         reference_table: Option<i64>,
     ) -> Result<reqwest::Response, Error> {
         let reference_table = match reference_table {
-            Some(reference_table) => format!("tabela_referencia={}", reference_table),
+            Some(reference_table) => format!("tabela_referencia={reference_table}"),
             None => "".to_string(),
         };
 

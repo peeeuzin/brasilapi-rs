@@ -148,7 +148,7 @@ mod cep_tests {
         let server = MockServer::start_async().await;
         let mock = server
             .mock_async(|when, then| {
-                when.method("GET").path(format!("/api/cep/v2/{}", cep_code));
+                when.method("GET").path(format!("/api/cep/v2/{cep_code}"));
                 then.status(500).json_body(json!({
                     "name": "Internal Server Error",
                     "message": "Error interno do servidor",
@@ -181,7 +181,7 @@ mod cep_tests {
         let server = MockServer::start_async().await;
         let mock = server
             .mock_async(|when, then| {
-                when.method("GET").path(format!("/api/cep/v2/{}", cep_code));
+                when.method("GET").path(format!("/api/cep/v2/{cep_code}"));
                 then.status(500).json_body(json!({
                 "name": "Internal Server Error",
                 "message": "Error interno do servidor",
