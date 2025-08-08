@@ -3,17 +3,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Ddd {
-    state: String,
-    cities: Vec<String>,
-    nome: Option<String>,
-    regiao: Option<Regiao>,
+    pub state: String,
+    pub cities: Vec<String>,
+    pub nome: Option<String>,
+    pub regiao: Option<Regiao>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Regiao {
-    id: i32,
-    sigla: String,
-    nome: String,
+    pub id: i32,
+    pub sigla: String,
+    pub nome: String,
 }
 
 pub struct DDDService {

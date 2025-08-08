@@ -3,23 +3,23 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Municipality {
-    nome: String,
-    codigo_ibge: String,
+    pub nome: String,
+    pub codigo_ibge: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct State {
-    id: i32,
-    sigla: String,
-    nome: String,
-    regiao: StateRegion,
+    pub id: i32,
+    pub sigla: String,
+    pub nome: String,
+    pub regiao: StateRegion,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct StateRegion {
-    id: i32,
-    sigla: String,
-    nome: String,
+    pub id: i32,
+    pub sigla: String,
+    pub nome: String,
 }
 
 pub enum MunicipalitiesProvider {

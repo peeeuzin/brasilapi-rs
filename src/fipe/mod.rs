@@ -4,28 +4,28 @@ use crate::{error::Error, spec::BRASIL_API_URL};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Brand {
-    nome: String,
-    valor: String,
+    pub nome: String,
+    pub valor: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Vehicle {
-    valor: String,
-    marca: String,
-    modelo: String,
+    pub valor: String,
+    pub marca: String,
+    pub modelo: String,
     #[serde(rename = "anoModelo")]
-    ano_modelo: i64,
-    combustivel: String,
+    pub ano_modelo: i64,
+    pub combustivel: String,
     #[serde(rename = "codigoFipe")]
-    codigo_fipe: String,
+    pub codigo_fipe: String,
     #[serde(rename = "mesReferencia")]
-    mes_referencia: String,
+    pub mes_referencia: String,
     #[serde(rename = "tipoVeiculo")]
-    tipo_veiculo: i64,
+    pub tipo_veiculo: i64,
     #[serde(rename = "siglaCombustivel")]
-    sigla_combustivel: String,
+    pub sigla_combustivel: String,
     #[serde(rename = "dataConsulta")]
-    data_consulta: String,
+    pub data_consulta: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]

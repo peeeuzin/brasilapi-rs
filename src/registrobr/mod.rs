@@ -3,16 +3,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Domain {
-    status_code: u16,
-    status: String,
-    fqdn: String,
-    suggestions: Option<Vec<String>>,
-    hosts: Option<Vec<String>>,
+    pub status_code: u16,
+    pub status: String,
+    pub fqdn: String,
+    pub suggestions: Option<Vec<String>>,
+    pub hosts: Option<Vec<String>>,
     #[serde(rename = "publication-status")]
-    publication_status: Option<String>,
+    pub publication_status: Option<String>,
     #[serde(rename = "expires-at")]
-    expires_at: Option<String>,
-    reasons: Option<Vec<String>>,
+    pub expires_at: Option<String>,
+    pub reasons: Option<Vec<String>>,
 }
 
 pub struct RegistroBrService {

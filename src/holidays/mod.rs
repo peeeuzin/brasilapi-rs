@@ -3,11 +3,11 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Holiday {
-    date: String,
+    pub date: String,
     #[serde(rename = "type")]
-    kind: String,
-    name: String,
-    full_name: Option<String>,
+    pub kind: String,
+    pub name: String,
+    pub full_name: Option<String>,
 }
 
 pub struct HolidayService {

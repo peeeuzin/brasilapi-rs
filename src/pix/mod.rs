@@ -4,12 +4,12 @@ use crate::error::Error;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Participant {
-    ispb: String,
-    nome: String,
-    nome_reduzido: String,
-    modalidade_participacao: String,
-    tipo_participacao: String,
-    inicio_operacao: String,
+    pub ispb: String,
+    pub nome: String,
+    pub nome_reduzido: String,
+    pub modalidade_participacao: String,
+    pub tipo_participacao: String,
+    pub inicio_operacao: String,
 }
 
 pub struct PIXService {
