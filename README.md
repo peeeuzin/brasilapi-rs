@@ -26,7 +26,7 @@ Uma [lib](https://crates.io/crates/brasilapi) para a API do [BrasilAPI](https://
  - [x] **Registros de domínios br**
  - [x] **PIX**
  - [x] **Tabela FIPE**
- - [ ] **ISBN**
+ - [x] **ISBN**
  - [ ] **Taxas**
 
 # Como contribuir
