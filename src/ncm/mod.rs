@@ -1,96 +1,101 @@
+use std::collections::HashMap;
+
 use crate::spec::BRASIL_API_URL;
 use reqwest::Response;
-use serde::Deserialize;
+
+type NcmCode = str;
+type NcmDescription = str;
+type Ncm = HashMap<String, String>;
 
 #[derive(Debug)]
-enum TypeFecth {
+enum Fetch {
     All,
-    Code,
-    Description,
+    Code(String),
+    Description(String),
     None,
 }
 
 #[derive(Debug)]
 pub struct NcmService {
     base_url: String,
-    type_fecth: TypeFecth,
-    target_ncm_code: Option<String>,
-    target_ncm_description: Option<String>,
+    fetch: Fetch,
 }
 
 impl NcmService {
     pub fn get() -> Self {
         Self {
             base_url: BRASIL_API_URL.to_string(),
-            type_fecth: TypeFecth::None,
-            target_ncm_code: None,
-            target_ncm_description: None,
+            fetch: Fetch::None,
         }
     }
 
     pub async fn all(&mut self) -> Vec<Ncm> {
-        self.type_fecth = TypeFecth::All;
-        let response: Response = self.conn_with_api().await;
-        let body: String = response.text().await.unwrap();
-        let vec_ncm: Vec<Ncm> = serde_json::from_str(&body).unwrap();
+        let result_fetch: String = self.fetch(Fetch::All).await;
+        let vec_ncm: Vec<Ncm> = self.assembly_ncm_hash_map(result_fetch);
         vec_ncm
     }
 
-    pub async fn code(&mut self, code: &str) -> Ncm {
-        self.type_fecth = TypeFecth::Code;
-        self.target_ncm_code = Some(code.to_string());
-        let response: Response = self.conn_with_api().await;
-        let body: String = response.text().await.unwrap();
-        let ncm: Ncm = serde_json::from_str(&body).expect("Error");
+    pub async fn code(&mut self, code: &NcmCode) -> Ncm {
+        let result_fetch: String = self.fetch(Fetch::Code(code.to_string())).await;
+        let mut vec_ncm: Vec<Ncm> = self.assembly_ncm_hash_map(result_fetch);
+        let ncm: Ncm = self.validade_ncm_to_code_fetch(&mut vec_ncm);
         ncm
     }
 
-    pub async fn description(&mut self, description: &str) -> Vec<Ncm> {
-        self.type_fecth = TypeFecth::Description;
-        self.target_ncm_description = Some(description.to_string());
-        let response: Response = self.conn_with_api().await;
-        let body: String = response.text().await.unwrap();
-        let ncm: Vec<Ncm> = serde_json::from_str(&body).unwrap();
-        ncm
+    pub async fn description(&mut self, description: &NcmDescription) -> Vec<Ncm> {
+        let result_fetch: String = self
+            .fetch(Fetch::Description(description.to_string()))
+            .await;
+        let vec_ncm: Vec<Ncm> = self.assembly_ncm_hash_map(result_fetch);
+        vec_ncm
     }
 
-    async fn conn_with_api(&self) -> Response {
-        let response: Response = reqwest::get(&self.set_url_by_type_fetch())
-            .await
-            .expect("Error:");
+    async fn fetch(&mut self, fetch: Fetch) -> String {
+        self.set_environment_for_fetch(fetch);
+        let fetch_result: Response = self.request_for_api().await;
+        fetch_result.text().await.unwrap()
+    }
+
+    fn assembly_ncm_hash_map(&self, result: String) -> Vec<Ncm> {
+        match self.fetch {
+            Fetch::Code(_) => vec![serde_json::from_str(&result).unwrap()],
+            Fetch::Description(_) => serde_json::from_str(&result).unwrap(),
+            Fetch::All => serde_json::from_str(&result).unwrap(),
+            _ => panic!("Deu merda"),
+        }
+    }
+
+    fn validade_ncm_to_code_fetch(&self, vec_ncm: &mut Vec<Ncm>) -> Ncm {
+        match vec_ncm.len() {
+            1 => vec_ncm.remove(0),
+            _ => panic!("Deu marda"),
+        }
+    }
+
+    fn set_environment_for_fetch(&mut self, fetch: Fetch) {
+        self.fetch = fetch;
+    }
+
+    async fn request_for_api(&self) -> Response {
+        let url: String = self.set_url_by_fetch();
+        let response: Response = reqwest::get(&url).await.expect("Error:");
         response
     }
 
-    fn set_url_by_type_fetch(&self) -> String {
-        match self.type_fecth {
-            TypeFecth::All => format!("{}/api/ncm/v1", self.base_url),
-            TypeFecth::Code => format!(
-                "{}/api/ncm/v1/{}",
-                self.base_url,
-                self.target_ncm_code.as_ref().unwrap()
-            ),
-            TypeFecth::Description => format!(
-                "{}/api/ncm/v1?search={}",
-                self.base_url,
-                self.target_ncm_description.as_ref().unwrap()
-            ),
-            TypeFecth::None => panic!("Deu merda"),
+    fn set_url_by_fetch(&self) -> String {
+        match self.fetch {
+            Fetch::All => format!("{}/api/ncm/v1", self.base_url),
+            Fetch::Code(ref c) => format!("{}/api/ncm/v1/{}", self.base_url, c),
+            Fetch::Description(ref d) => format!("{}/api/ncm/v1?search={}", self.base_url, d),
+            Fetch::None => panic!("Deu merda"),
         }
     }
-}
-
-#[derive(Debug, PartialEq, Deserialize)]
-pub struct Ncm {
-    codigo: String,
-    descricao: String,
-    data_inicio: String,
-    data_fim: String,
 }
 
 #[cfg(test)]
 mod ncm_test {
     use crate::{
-        ncm::{NcmService, TypeFecth},
+        ncm::{Fetch, NcmService},
         spec::BRASIL_API_URL,
     };
 
@@ -98,65 +103,65 @@ mod ncm_test {
     const NCM_DESCRIPTION: &'static str = "carne";
 
     #[test]
-    fn set_url_for_while_type_fetch_is_all() {
+    fn set_url_for_while_fetch_is_all() {
         let ncm_service_set_all: NcmService = StateNcmService::All.set();
         assert_eq!(
-            ncm_service_set_all.set_url_by_type_fetch(),
+            ncm_service_set_all.set_url_by_fetch(),
             PossibleUrl::All.get()
         );
     }
 
     #[test]
-    fn set_url_for_while_type_fetch_is_code() {
+    fn set_url_for_while_fetch_is_code() {
         let ncm_service_set_code: NcmService = StateNcmService::Code.set();
         assert_eq!(
-            ncm_service_set_code.set_url_by_type_fetch(),
+            ncm_service_set_code.set_url_by_fetch(),
             PossibleUrl::Code.get()
         );
     }
 
     #[test]
-    fn set_url_for_while_type_fetch_is_description() {
+    fn set_url_for_while_fetch_is_description() {
         let ncm_service_set_description: NcmService = StateNcmService::Description.set();
         assert_eq!(
-            ncm_service_set_description.set_url_by_type_fetch(),
+            ncm_service_set_description.set_url_by_fetch(),
             PossibleUrl::Description.get()
         );
     }
 
     #[tokio::test]
-    async fn status_200_with_api_all_ncm() {
+    async fn status_200_with_api_when_fetch_is_all() {
         let ncm_service_set_all: NcmService = StateNcmService::All.set();
-        assert_eq!(ncm_service_set_all.conn_with_api().await.status(), 200);
+        assert_eq!(ncm_service_set_all.request_for_api().await.status(), 200);
     }
 
     #[tokio::test]
-    async fn status_200_with_api_code_ncm() {
+    async fn status_200_with_api_when_fetch_is_code() {
         let ncm_service_set_code: NcmService = StateNcmService::Code.set();
-        assert_eq!(ncm_service_set_code.conn_with_api().await.status(), 200);
+        assert_eq!(ncm_service_set_code.request_for_api().await.status(), 200);
     }
 
     #[tokio::test]
-    async fn status_200_with_api_description_ncm() {
+    async fn status_200_with_api_when_fetch_is_description() {
         let ncm_service_set_description: NcmService = StateNcmService::Description.set();
         assert_eq!(
-            ncm_service_set_description.conn_with_api().await.status(),
+            ncm_service_set_description.request_for_api().await.status(),
             200
         );
     }
 
     #[tokio::test]
-    async fn mount_vec_with_fetch_all_ncm() {
-        NcmService::get().all().await;
+    async fn assembly_ncm_hash_map_when_fetch_is_all() {
+        println!("{:?}", NcmService::get().all().await);
     }
 
     #[tokio::test]
-    async fn mount_ncm_with_fetch_code() {
+    async fn assembly_ncm_hash_map_when_fetch_is_code() {
         NcmService::get().code(NCM_CODE).await;
     }
 
     #[tokio::test]
-    async fn mount_struct_ncm_with_fetch_description() {
+    async fn assembly_ncm_hash_map_when_fetch_is_description() {
         NcmService::get().description(NCM_DESCRIPTION).await;
     }
 
@@ -190,21 +195,15 @@ mod ncm_test {
             match self {
                 Self::All => NcmService {
                     base_url: BRASIL_API_URL.to_string(),
-                    type_fecth: TypeFecth::All,
-                    target_ncm_code: None,
-                    target_ncm_description: None,
+                    fetch: Fetch::All,
                 },
                 Self::Code => NcmService {
                     base_url: BRASIL_API_URL.to_string(),
-                    type_fecth: TypeFecth::Code,
-                    target_ncm_code: Some(NCM_CODE.to_string()),
-                    target_ncm_description: None,
+                    fetch: Fetch::Code(NCM_CODE.to_string()),
                 },
                 Self::Description => NcmService {
                     base_url: BRASIL_API_URL.to_string(),
-                    type_fecth: TypeFecth::Description,
-                    target_ncm_code: None,
-                    target_ncm_description: Some(NCM_DESCRIPTION.to_string()),
+                    fetch: Fetch::Description(NCM_DESCRIPTION.to_string()),
                 },
             }
         }
