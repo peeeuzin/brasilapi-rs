@@ -47,6 +47,7 @@ pub mod fipe;
 pub mod holidays;
 pub mod ibge;
 pub mod isbn;
+pub mod ncm;
 pub mod pix;
 pub mod registrobr;
 pub mod taxas;
