@@ -66,7 +66,20 @@ impl NcmService {
         match self.fetch {
             Fetch::Code(_) => vec![serde_json::from_str(&result).unwrap()],
             Fetch::Description(_) => serde_json::from_str(&result).unwrap(),
-            Fetch::All => serde_json::from_str(&result).unwrap(),
+    fn assembly_ncm_hash_map(&self, result: String) -> Result<Vec<Ncm>, Error> {
+        match self.fetch {
+            Fetch::Code(_) => {
+                let ncm: Ncm = serde_json::from_str(&result).map_err(Error::from_error)?;
+                Ok(vec![ncm])
+            }
+            Fetch::Description(_) => {
+                let vec_ncm: Vec<Ncm> = serde_json::from_str(&result).map_err(Error::from_error)?;
+                Ok(vec_ncm)
+            }
+            Fetch::All => {
+                let vec_ncm: Vec<Ncm> = serde_json::from_str(&result).map_err(Error::from_error)?;
+                Ok(vec_ncm)
+            }
             Fetch::None => panic!("Don't use Fetch::None in assembly_ncm_hash_map"),
         }
     }
