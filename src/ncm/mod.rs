@@ -57,7 +57,7 @@ impl NcmService {
         self.set_environment_for_fetch(fetch);
         let fetch_result: Result<reqwest::Response, reqwest::Error> = self.request_for_api().await;
         match fetch_result {
-            Ok(r) => Ok(r.text().await.unwrap()),
+            Ok(r) => Ok(r.text().await?),
             Err(e) => Err(Error::from_error(e)),
         }
     }
