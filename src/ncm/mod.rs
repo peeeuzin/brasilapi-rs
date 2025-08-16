@@ -128,7 +128,8 @@ mod ncm_test {
     };
 
     const NCM_CODE: &'static str = "33051000";
-    const NCM_DESCRIPTION: &'static str = "carne";
+    const NCM_CODE: &str = "33051000";
+    const NCM_DESCRIPTION: &str = "carne";
 
     macro_rules! set_fetch_ncm_service {
         ($type:expr) => {
