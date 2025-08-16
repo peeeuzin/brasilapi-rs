@@ -48,7 +48,7 @@ impl NcmService {
         let result_fetch: String = self
             .fetch(Fetch::Description(description.to_string()))
             .await
-            .unwrap();
+            .await?;
         let vec_ncm: Vec<Ncm> = self.assembly_ncm_hash_map(result_fetch);
         Ok(vec_ncm)
     }
