@@ -104,7 +104,18 @@ impl NcmService {
             Fetch::All => format!("{}/api/ncm/v1", self.base_url),
             Fetch::Code(ref c) => format!("{}/api/ncm/v1/{}", self.base_url, c),
             Fetch::Description(ref d) => format!("{}/api/ncm/v1?search={}", self.base_url, d),
-            Fetch::None => panic!("Don't use Fetch::None in set_url_by_fetch"),
+    async fn request_for_api(&self) -> Result<reqwest::Response, Error> {
+        let url = self.set_url_by_fetch()?;
+        let response = reqwest::get(&url).await.map_err(Error::from_error)?;
+        Ok(response)
+    }
+
+    fn set_url_by_fetch(&self) -> Result<String, Error> {
+        match self.fetch {
+            Fetch::All => Ok(format!("{}/api/ncm/v1", self.base_url)),
+            Fetch::Code(ref c) => Ok(format!("{}/api/ncm/v1/{}", self.base_url, c)),
+            Fetch::Description(ref d) => Ok(format!("{}/api/ncm/v1?search={}", self.base_url, d)),
+            Fetch::None => Err(Error::custom("Don't use Fetch::None in set_url_by_fetch")),
         }
     }
 }
