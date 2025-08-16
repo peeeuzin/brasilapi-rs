@@ -33,7 +33,13 @@ impl NcmService {
     }
 
     pub async fn code(&mut self, code: &str) -> Result<Vec<Ncm>, Error> {
-        let result_fetch: String = self.fetch(Fetch::Code(code.to_string())).await.unwrap();
+        let result_fetch: String = self.fetch(Fetch::All).await?;
+        let vec_ncm: Vec<Ncm> = self.assembly_ncm_hash_map(result_fetch);
+        Ok(vec_ncm)
+    }
+
+    pub async fn code(&mut self, code: &str) -> Result<Vec<Ncm>, Error> {
+        let result_fetch: String = self.fetch(Fetch::Code(code.to_string())).await?;
         let vec_ncm: Vec<Ncm> = self.assembly_ncm_hash_map(result_fetch);
         Ok(vec_ncm)
     }
